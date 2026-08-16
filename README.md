@@ -1,5 +1,7 @@
 # Pools.trade Fee-Compounding Keeper
 
+[![quality](https://github.com/MeiYanDong/pools-trade-keeper/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/MeiYanDong/pools-trade-keeper/actions/workflows/quality.yml)
+
 这是一个面向 Robinhood Chain 的 Pools.trade 复投 Keeper。第一版是**生产链只读 Shadow**：它读取真实合约、按 `tokenId` 固定同一区块状态、计算增加 `1e20` 流动性所需的双边资产，并留下可回放的证据。
 
 ## 大白话机制
@@ -45,7 +47,7 @@ npm ci
 npm run verify
 ```
 
-`verify` 是本仓库唯一的本地合并前门禁：它依次验证 sniper spec、格式、lint、类型、31 项业务测试、部署脚本语法、干净编译产物和 SHA-256 发布清单。GitHub Actions 已定义同一条干净检出链路，但在仓库尚未推送并设置必需检查前，它只是“已定义”，不是“已生效”。
+`verify` 是本仓库唯一的合并前门禁：它依次验证 sniper spec、凭据扫描、格式、lint、类型、31 项业务测试、部署脚本语法、干净编译产物和 SHA-256 发布清单。GitHub Actions 在干净检出的托管 runner 上执行同一命令；公开仓库的 `main` 已将 GitHub Actions App 提供的 `verify` 配置为严格 required check，管理员也不能绕过。
 
 先在你自己的交互式终端安全写入生产 RPC。输入内容不会显示，也不会进入 shell 历史；文件保存在被 Git 忽略的 `secrets/keeper.env`，权限为 `0600`：
 

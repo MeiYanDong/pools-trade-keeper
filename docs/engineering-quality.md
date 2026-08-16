@@ -14,7 +14,7 @@ Acceptance criteria:
 - formatter, lint, typecheck, tests, build, high-confidence secret scanning, sniper-spec validation, deploy-script syntax, and artifact verification available through `npm run verify`;
 - a clean-checkout GitHub Actions workflow runs the same command.
 
-Evidence status: the private GitHub repository is active and push run `31940805043` completed successfully on GitHub-hosted Ubuntu. Its uploaded artifact contained the same 110-file manifest SHA-256 as local and production. The `verify` check is **not required for merges**: GitHub rejected private-repository branch protection with HTTP 403 because the current account requires GitHub Pro (or a public repository) for that feature.
+Evidence status: the public GitHub repository is active. Push runs `31940805043` and `31940902541` completed successfully on GitHub-hosted Ubuntu, and their uploaded artifact contained the same 110-file manifest SHA-256 as local and production. `main` now requires strict `verify` from GitHub Actions App `15368`; administrator enforcement is enabled, while force-push and branch deletion are disabled.
 
 ## Story B: critical decision tests
 
@@ -44,4 +44,4 @@ Acceptance criteria:
 - rollback and evidence-preservation steps are documented;
 - Shadow-only/Canary boundaries are recorded in an ADR.
 
-Evidence status: implemented locally and exercised on the production Shadow host on 2026-08-16. The service now uses the pinned application-owned Node `22.23.2`; disk pressure was reduced; the versioned artifact passed staged doctor/replay checks and the machine-readable post-deploy gate. Two subsequent batches advanced the cursor with zero errors and zero shots. Runtime deployment remains manual; GitHub CI is active, while enforcement of its `verify` check remains blocked by the private-repository plan limitation recorded above.
+Evidence status: implemented locally and exercised on the production Shadow host on 2026-08-16. The service now uses the pinned application-owned Node `22.23.2`; disk pressure was reduced; the versioned artifact passed staged doctor/replay checks and the machine-readable post-deploy gate. Two subsequent batches advanced the cursor with zero errors and zero shots. Runtime deployment remains manual; repository CI and its required `verify` merge gate are active.

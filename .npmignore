@@ -1,0 +1,10 @@
+data/
+runs/
+secrets/
+node_modules/
+coverage/
+.env
+.env.*
+*.keystore.json
+*.log
+.DS_Store

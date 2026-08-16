@@ -1,0 +1,37 @@
+[
+  {
+    "id": "token-624742-block-34372104",
+    "evidenceKind": "MARK_TO_MARKET",
+    "tokenId": "624742",
+    "blockNumber": "34372104",
+    "sourceUrl": "https://robinhoodchain.blockscout.com/address/0xf9526Dd3361fe0ba6b7a99533ed471D3E808E99a",
+    "grossNativeWei": "571210000000000",
+    "gasCostNativeWei": "24164500000000",
+    "expectedNetNativeWei": "547045500000000",
+    "evidenceLevel": "same-block StateView mark-to-market plus receipt gas; not realized token exit"
+  },
+  {
+    "id": "token-625434-realized-residual",
+    "evidenceKind": "REALIZED_NATIVE_RESIDUAL",
+    "tokenId": "625434",
+    "blockNumber": "34365193",
+    "transactionHash": "0xec4104c685f87b5c978614ab02ddc30c2c418649d898616e55780a3b65f64947",
+    "sourceUrl": "https://robinhoodchain.blockscout.com/tx/0xec4104c685f87b5c978614ab02ddc30c2c418649d898616e55780a3b65f64947",
+    "grossNativeWei": "673723745357485",
+    "gasCostNativeWei": "25750207572000",
+    "expectedNetNativeWei": "647973537785485",
+    "evidenceLevel": "receipt and trace: actual native residual paid to the executor beneficiary, less top-level receipt gas"
+  },
+  {
+    "id": "token-719745-realized-residual",
+    "evidenceKind": "REALIZED_NATIVE_RESIDUAL",
+    "tokenId": "719745",
+    "blockNumber": "37745813",
+    "transactionHash": "0x075e7d078ccee8e9ecc9146de45df6228bf4bddced67e46db65e3fb3aac37b29",
+    "sourceUrl": "https://robinhoodchain.blockscout.com/tx/0x075e7d078ccee8e9ecc9146de45df6228bf4bddced67e46db65e3fb3aac37b29",
+    "grossNativeWei": "574256044016908",
+    "gasCostNativeWei": "14390895420000",
+    "expectedNetNativeWei": "559865148596908",
+    "evidenceLevel": "receipt and trace: actual native residual paid to the executor beneficiary, less top-level receipt gas"
+  }
+]

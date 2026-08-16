@@ -1,0 +1,77 @@
+{
+  "_meta": {
+    "schemaVersion": 1,
+    "evidenceState": "REPOSITORY_RECORD_NOT_LIVE_READBACK",
+    "recordedAt": "2026-08-16T09:32:59Z",
+    "watermarks": {
+      "fullInventoryThroughBlock": "37870671",
+      "lastObservedShadowBatchBlock": "37870672",
+      "lastReadOnlyDoctorBlock": "37870915"
+    },
+    "refreshRequiredBeforeDecision": true,
+    "note": "VERIFIED_CURRENT entries below mean verified at the recorded watermark, not guaranteed current chain or runtime state."
+  },
+  "transport": {
+    "level": "VERIFIED_CURRENT",
+    "access": "READ",
+    "limitations": [
+      "credentialed HTTP path is live and WSS chain-id handshake passed; event-subscription latency and provider failover are unmeasured"
+    ]
+  },
+  "discovery": {
+    "level": "VERIFIED_CURRENT",
+    "access": "READ",
+    "limitations": [
+      "gap-free relevant-event inventory is verified from 1000 blocks before the earliest relevant PositionManager transfer through block 37870671"
+    ]
+  },
+  "identity": {
+    "level": "VERIFIED_CURRENT",
+    "access": "READ",
+    "limitations": ["bound to Robinhood chain 4663 and pinned deployment addresses"]
+  },
+  "quote": {
+    "level": "VERIFIED_CURRENT",
+    "access": "READ",
+    "limitations": [
+      "deployed V4Quoter exact-output rebalance quote is implemented for native surplus to token deficit; complete callback and final token exit remain unknown"
+    ]
+  },
+  "simulation": {
+    "level": "PLANNED",
+    "access": "READ",
+    "limitations": ["exact executor callback and historical fork are not implemented"]
+  },
+  "calldata": {
+    "level": "UNSUPPORTED",
+    "access": "PREPARE",
+    "limitations": ["no production executor payload builder"]
+  },
+  "sign": {
+    "level": "UNSUPPORTED",
+    "access": "WRITE",
+    "limitations": ["wallet can be created encrypted but no signer is connected"]
+  },
+  "broadcast": {
+    "level": "UNSUPPORTED",
+    "access": "WRITE",
+    "limitations": ["no submission code exists"]
+  },
+  "reconcile": {
+    "level": "IMPLEMENTED",
+    "access": "RECOVER",
+    "limitations": [
+      "append-only observations and inventory only; pending transaction recovery is not applicable yet"
+    ]
+  },
+  "exit": {
+    "level": "UNSUPPORTED",
+    "access": "RECOVER",
+    "limitations": ["no executable token exit adapter"]
+  },
+  "replay": {
+    "level": "TESTED",
+    "access": "READ",
+    "limitations": ["economic receipt fixture only; no archive fork callback replay yet"]
+  }
+}

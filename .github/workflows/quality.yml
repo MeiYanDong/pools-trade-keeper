@@ -1,0 +1,48 @@
+name: quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+          package-manager-cache: false
+
+      - name: Install clean dependencies
+        run: npm ci
+
+      - name: Run repository quality gate
+        run: npm run verify
+
+      - name: Upload verified Shadow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: pools-trade-shadow-${{ github.sha }}
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 14
+          path: |
+            dist/
+            .node-version
+            package.json
+            package-lock.json
+            scripts/*.mjs
+            deploy/
+            docs/sniper-spec.json
+            docs/capability-manifest.json
+            fixtures/historical-claims.json

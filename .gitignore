@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+data/
+runs/
+secrets/
+.env
+.env.*
+!.env.example
+*.keystore.json
+*.log
+.DS_Store

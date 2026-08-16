@@ -1,0 +1,24 @@
+[Unit]
+Description=Pools.trade fee-compounding shadow keeper
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pools-keeper
+Group=pools-keeper
+WorkingDirectory=/opt/pools-trade-keeper
+EnvironmentFile=/etc/pools-trade-keeper/keeper.env
+Environment=OPERATION_MODE=shadow
+Environment=LIVE_BROADCAST_ENABLED=false
+ExecStart=/usr/bin/node /opt/pools-trade-keeper/dist/src/cli.js shadow --watch --sync
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/pools-trade-keeper
+
+[Install]
+WantedBy=multi-user.target

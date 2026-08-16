@@ -1,0 +1,372 @@
+{
+  "spec_version": "1.4",
+  "objective": {
+    "statement": "Measure tokenId-level executable economics and race outcomes before authorizing any Pools.trade fee-compounding transaction.",
+    "risk_budget": {
+      "max_input_native": 0,
+      "max_gas_native": 0,
+      "max_failed_gas_native": 0,
+      "max_daily_loss_native": 0,
+      "max_concurrent_positions": 0
+    }
+  },
+  "race_thesis": {
+    "reward_source": "Instant v4 pool LP fees attributed by FeeSplitter to a CompoundingClaimRecipient tokenId",
+    "allocation": "EXCLUSIVE_STATE_CLAIM",
+    "sequencing_rule": {
+      "type": "UNKNOWN",
+      "evidence_state": "UNKNOWN",
+      "reason": "the first successful claim consumes the state, but sequencer ordering among competing valid transactions has not been causally measured"
+    },
+    "earliest_public_signal": "a canonical PoolManager swap changes fee growth for a known FeeSplitter-owned position",
+    "earliest_inferable_signal": "fixed-block feeGrowthInside minus the position checkpoint predicts what permissionless collectFees would attribute before AmountsReceived exists",
+    "earliest_safe_action": "prepare a same-block collect-plus-claim projection; do not sign or broadcast",
+    "controllable_edges": ["INFORMATION", "DECISION", "PREPARATION", "TRANSPORT", "ECONOMIC"],
+    "invalidating_evidence": [
+      "claim surplus cannot be converted through an executable exit",
+      "conditional win rate makes conservative EV non-positive",
+      "deployed bytecode or invariants no longer match the pinned source"
+    ]
+  },
+  "signal_strategy": {
+    "ladder": [
+      {
+        "id": "fee-growth-delta",
+        "tier": "STATE",
+        "source": "PositionManager ownership inventory plus StateView fee-growth reads",
+        "causal_claim": "uncollected LP fees can be projected before a competitor emits AmountsReceived by collecting them",
+        "known_fields": [
+          "chain_id",
+          "fee_splitter",
+          "token_id",
+          "pool_id",
+          "fee_growth_checkpoint",
+          "current_fee_growth"
+        ],
+        "late_binding_fields": [
+          "standing_splitter_balance",
+          "callback_simulation",
+          "executable_exit_quote",
+          "gas_quote"
+        ]
+      },
+      {
+        "id": "amounts-received",
+        "tier": "RESULT",
+        "source": "CompoundingClaimRecipient.AmountsReceived",
+        "causal_claim": "the event confirms collection already happened and calibrates the proactive fee-growth projection",
+        "known_fields": ["chain_id", "contract", "token_id", "block_number", "log_index"],
+        "late_binding_fields": [
+          "current_amounts",
+          "position_range",
+          "sqrt_price",
+          "exit_quote",
+          "gas_quote"
+        ]
+      },
+      {
+        "id": "fixed-block-snapshot",
+        "tier": "ACTIVATION",
+        "source": "recipient plus PositionManager plus StateView eth_call",
+        "causal_claim": "a positive same-block mark-to-market residual creates a shadow candidate, not a live shot",
+        "known_fields": [
+          "token_id",
+          "claimable_assets",
+          "tick_range",
+          "sqrt_price",
+          "required_delta_liquidity"
+        ],
+        "late_binding_fields": [
+          "callback_simulation",
+          "executable_exit_quote",
+          "conditional_win_probability"
+        ]
+      }
+    ],
+    "chosen_primary": "fee-growth-delta",
+    "fallbacks": ["AmountsReceived result signal", "gap-free canonical log backfill"],
+    "late_binding_fields": [
+      "current_amounts",
+      "sqrt_price",
+      "gas_quote",
+      "exit_quote",
+      "authorization_revision"
+    ],
+    "false_positive_policy": "emit NO_SHOT whenever exit, callback, competition or authorization evidence is unknown",
+    "false_negative_audit": "compare PositionManager transfers plus canonical AmountsReceived and Claimed logs with inventory and shadow-decision watermarks"
+  },
+  "competition": {
+    "type": "EXCLUSIVE_STATE_CLAIM",
+    "competitor_model": "UNKNOWN win model; recent history shows at least six EOA-to-executor paths and cannot be represented as one global win rate",
+    "win_probability_dimensions": [
+      "reward_band",
+      "candidate_age_blocks",
+      "signal_source",
+      "gas_band",
+      "competitor_presence",
+      "executor_route"
+    ],
+    "ordering_evidence": [
+      "the first successful claim zeroes current attribution; finer same-block ordering remains UNKNOWN"
+    ],
+    "sample_policy": {
+      "minimum_total": 100,
+      "insufficient_behavior": "report intervals by reward and age cohort and keep NO_SHOT"
+    }
+  },
+  "shot_policy": {
+    "profiles": [
+      { "id": "read-only-fixed-block", "profile": "PREDICTIVE_PREPARE", "race_mode": "SHADOW" },
+      { "id": "unknown-or-nonpositive", "profile": "NO_SHOT", "race_mode": "SHADOW" }
+    ],
+    "race_experiment": { "enabled": false }
+  },
+  "race_timeline": {
+    "required_boundaries": [
+      "source_received",
+      "candidate_matched",
+      "snapshot_fixed",
+      "decision_complete",
+      "included",
+      "canonical_effect"
+    ],
+    "wire_measurement_level": "UNKNOWN",
+    "inclusion_position_required": true
+  },
+  "opportunity_census": {
+    "source": "gap-free PositionManager transfers to both FeeSplitters plus AmountsReceived and Claimed backfill",
+    "completeness_watermark": "VERIFIED_GAP_FREE_RELEVANT_EVENTS_FROM_28519117_THROUGH_37870671",
+    "required_outcomes": [
+      "NOT_OBSERVED",
+      "OBSERVED_AFTER_EXPIRY",
+      "NO_SHOT_NEGATIVE_EV",
+      "NO_SHOT_POLICY",
+      "BLOCKED_CORRECTNESS",
+      "ATTEMPTED",
+      "WON",
+      "CONFIRMED_LOST_RACE",
+      "UNKNOWN"
+    ],
+    "counterfactual_policy": "AT_TIME_INFORMATION_ONLY"
+  },
+  "learning": {
+    "race_denominator": ["WON", "CONFIRMED_LOST_RACE"],
+    "excluded_from_race": [
+      "NO_SHOT_NEGATIVE_EV",
+      "NO_SHOT_POLICY",
+      "LOW_VALUE_GUARD_EXIT",
+      "UNKNOWN"
+    ],
+    "model_versioning": "APPEND_ONLY"
+  },
+  "opportunity": {
+    "source": "FeeSplitter-owned position inventory and StateView fee-growth adapter",
+    "event_name": "fee_growth_revision",
+    "identity_fields": ["chain_id", "recipient", "token_id", "state_revision_block"],
+    "dedupe_key": "chain_id:recipient:token_id:state_revision_block"
+  },
+  "timing": {
+    "opportunity_ttl_ms": 0,
+    "end_to_end_budget_ms": 0,
+    "clock": "chain_block_plus_monotonic_local",
+    "boundary": {
+      "basis": "STATE",
+      "origin": "fixed recipient and pool state revision",
+      "absolute_value": "first successful claim or any state revision after the fixed block",
+      "refresh_policy": "never_extend_same_opportunity"
+    },
+    "deadline_behavior": "invalidate the observation and create a new revision; never reuse the old decision",
+    "deadline_checkpoints": ["before_snapshot", "before_decision"],
+    "timeline_fields": [
+      "source_occurred_at",
+      "received_at",
+      "normalized_at",
+      "decision_started_at",
+      "decided_at",
+      "signed_at",
+      "broadcast_started_at",
+      "included_at",
+      "confirmed_at"
+    ]
+  },
+  "profile": {
+    "chain_id": 4663,
+    "protocol": "pools_trade_liquidity_launcher_dd8769",
+    "execution_adapter": "compounding_claim_recipient_shadow",
+    "wallet_scope": "none",
+    "operation_mode": "shadow"
+  },
+  "decision": {
+    "correctness_invariants": [
+      {
+        "id": "deployed-bindings-match",
+        "condition": "chain id, bytecode presence, recipient PositionManager and minLiquidityIncrease match the pinned deployment",
+        "risk_reduced": "wrong-chain or wrong-contract execution",
+        "false_block_cost": "one shadow observation is skipped",
+        "latency_budget_ms": 12000,
+        "latency_estimate": {
+          "state": "UNKNOWN",
+          "reason": "production provider latency sample is not yet collected"
+        },
+        "voi_estimate": {
+          "state": "KNOWN",
+          "expected_loss_reduction": "blocks any action against an unbound deployment",
+          "basis": "identity invariant"
+        },
+        "blocking_mode": "block",
+        "isolation_scope": "capability",
+        "fallback": "NO_SHOT"
+      },
+      {
+        "id": "same-block-state",
+        "condition": "amounts, range, liquidity and pool state share one fixed block",
+        "risk_reduced": "mixed-state false profit",
+        "false_block_cost": "candidate is deferred to a new revision",
+        "latency_budget_ms": 12000,
+        "latency_estimate": {
+          "state": "UNKNOWN",
+          "reason": "RPC batch latency is not benchmarked"
+        },
+        "voi_estimate": {
+          "state": "KNOWN",
+          "expected_loss_reduction": "prevents invalid arithmetic across state revisions",
+          "basis": "state consistency invariant"
+        },
+        "blocking_mode": "block",
+        "isolation_scope": "opportunity",
+        "fallback": "create_new_revision"
+      }
+    ],
+    "adaptive_gates": [
+      {
+        "id": "executable-exit-and-callback",
+        "condition": "exact callback simulation, full residual exit and executor gas distribution are known and fresh; deployed V4Quoter rebalance quote alone is insufficient",
+        "risk_reduced": "paper-profit and illiquid-tail loss",
+        "false_block_cost": "a potentially profitable race is not entered",
+        "latency_budget_ms": 0,
+        "latency_estimate": {
+          "state": "UNKNOWN",
+          "reason": "rebalance quote is implemented but exact callback and final residual exit are not"
+        },
+        "voi_estimate": {
+          "state": "UNKNOWN",
+          "reason": "loss and false-block distributions are unmeasured"
+        },
+        "blocking_mode": "block",
+        "isolation_scope": "intent",
+        "fallback": "NO_SHOT"
+      }
+    ],
+    "soft_checks": [
+      {
+        "id": "descriptive-token-metadata",
+        "condition": "symbol and decimals are available without delaying the fixed-block snapshot",
+        "risk_reduced": "human reporting ambiguity only",
+        "false_block_cost": "unacceptable because metadata is non-causal",
+        "latency_budget_ms": 100,
+        "latency_estimate": { "state": "UNKNOWN", "reason": "metadata latency not measured" },
+        "voi_estimate": { "state": "UNKNOWN", "reason": "metadata has no proven execution value" },
+        "blocking_mode": "observe",
+        "isolation_scope": "capability",
+        "fallback": "continue_without_metadata"
+      }
+    ]
+  },
+  "execution": {
+    "mode": "shadow",
+    "min_out": {
+      "mode": "executable_quote_required",
+      "rationale": "live execution is not implemented"
+    },
+    "authorization": {
+      "mode": "MANUAL_ARM",
+      "scope_binding": "no live scope exists in this version",
+      "expiry_policy": "missing authorization is expired by definition",
+      "evidence_record": "append-only authorization assessment"
+    },
+    "nonce_policy": "not_applicable_shadow",
+    "signing_policy": "unsupported",
+    "broadcast_policy": "unsupported",
+    "deadline_ms": 0
+  },
+  "recovery": {
+    "pending_timeout_ms": 0,
+    "receipt_timeout_ms": 0,
+    "same_raw_rebroadcast_limit": 0,
+    "restart_policy": "resume from canonical inventory watermark and append a new observation revision",
+    "unresolved_transaction_fallback": "not applicable because transactions are unsupported"
+  },
+  "exit": {
+    "policy": "NO_ENTRY_UNTIL_EXECUTABLE_EXIT_EXISTS",
+    "max_holding_ms": 0,
+    "monitor_interval_ms": 0,
+    "manual_override": false,
+    "sell_failure_fallback": "NO_SHOT"
+  },
+  "evidence": {
+    "decision_receipt": true,
+    "intent_journal": false,
+    "signed_intent_fingerprint": false,
+    "broadcast_attempts": false,
+    "receipt_store": true,
+    "realized_exit_record": false,
+    "replay_key_fields": ["chain_id", "recipient", "token_id", "state_revision_block"]
+  },
+  "capabilities": {
+    "transport": {
+      "level": "VERIFIED_CURRENT",
+      "access": "READ",
+      "limitations": [
+        "credentialed HTTP read path is live and WSS chain-id handshake passed; event-subscription latency and failover are unmeasured"
+      ]
+    },
+    "discovery": {
+      "level": "VERIFIED_CURRENT",
+      "access": "READ",
+      "limitations": ["gap-free relevant-event inventory verified through block 37870671"]
+    },
+    "identity": {
+      "level": "VERIFIED_CURRENT",
+      "access": "READ",
+      "limitations": ["pinned addresses and current bytecode presence only"]
+    },
+    "quote": {
+      "level": "VERIFIED_CURRENT",
+      "access": "READ",
+      "limitations": [
+        "deployed V4Quoter exact-output native-to-token rebalance quote is integrated; full callback and residual exit are not"
+      ]
+    },
+    "simulation": {
+      "level": "PLANNED",
+      "access": "READ",
+      "limitations": ["no exact callback fork"]
+    },
+    "calldata": {
+      "level": "UNSUPPORTED",
+      "access": "PREPARE",
+      "limitations": ["no executor payload builder"]
+    },
+    "sign": { "level": "UNSUPPORTED", "access": "WRITE", "limitations": ["no signer connected"] },
+    "broadcast": {
+      "level": "UNSUPPORTED",
+      "access": "WRITE",
+      "limitations": ["no transaction submission code"]
+    },
+    "reconcile": {
+      "level": "IMPLEMENTED",
+      "access": "RECOVER",
+      "limitations": ["observation and inventory recovery only"]
+    },
+    "exit": {
+      "level": "UNSUPPORTED",
+      "access": "RECOVER",
+      "limitations": ["no executable token exit adapter"]
+    },
+    "replay": {
+      "level": "TESTED",
+      "access": "READ",
+      "limitations": ["economic receipt fixture only; no archive fork"]
+    }
+  }
+}

@@ -144,6 +144,8 @@ NODE_BIN=/opt/pools-trade-runtime/node-v22.23.2/bin/node \
 
 Final result: `PASS`, mode `READ_ONLY_SHADOW`, Node `22.23.2`, restarts `0`, evidence age `8s`, evidence block `37887112`, doctor block `37887207`, disk used `89%`, shots `0`.
 
+Follow-up single-position read at block `37889419`: `tokenId 499858` remained one `QUOTE_CANDIDATE`, but its residual after the exact-output V4Quoter amount and modeled historical successful gas was only `1,968,079,841,114 wei` (`0.000001968079841114 ETH`). The evidence still returned `NO_SHOT` because exact callback simulation, FeeSplitter standing balance, conditional win probability, failed-transaction gas, signing, and broadcast are unresolved. This is a thin research signal, not executable or realized profit.
+
 ### Remaining boundary
 
 - Deployment remains manual; the GitHub Actions workflow is defined locally but has no remote run or required-check evidence.

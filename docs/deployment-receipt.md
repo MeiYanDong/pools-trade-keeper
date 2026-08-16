@@ -148,6 +148,15 @@ Follow-up single-position read at block `37889419`: `tokenId 499858` remained on
 
 ### Remaining boundary
 
-- Deployment remains manual; the GitHub Actions workflow is defined locally but has no remote run or required-check evidence.
+- Deployment remains manual. GitHub Actions has remote run evidence, but the `verify` check is not enforceable as a required check under the current private-repository plan.
 - The current unclaimed inventory has not been proven positive EV. These batches are negative-at-spot observations, not a profitability promise.
 - Executor callback simulation, signing, broadcast, transaction reconciliation, and executable exit remain unsupported. No wallet or private key was added to production.
+
+## GitHub CI activation — 2026-08-16 10:07Z
+
+- Repository: private `MeiYanDong/pools-trade-keeper`.
+- Initial remote `main`: local and remote commit `0f8d556590a4b8c9298769b60f821740251319ec` matched exactly.
+- GitHub Actions push run [`31940805043`](https://github.com/MeiYanDong/pools-trade-keeper/actions/runs/31940805043): `quality / verify` completed successfully on GitHub-hosted Ubuntu in 26 seconds.
+- Uploaded artifact: `pools-trade-shadow-0f8d556590a4b8c9298769b60f821740251319ec`, `143,614` bytes, not expired at readback.
+- Downloaded cloud artifact: Node pin `22.23.2`, 110 manifest files, manifest SHA-256 `cad8a7a9897893c87095f6d22a1e0a246662441290f6c0af3b9f8e37d2fe1f93`, matching both local and production; no `.env`, `keeper.env`, `node_modules`, or AppleDouble path was present.
+- Branch-protection attempt: rejected with HTTP 403 (`Upgrade to GitHub Pro or make this repository public to enable this feature`). The repository was kept private. Therefore online CI is proven active, but it is advisory rather than a server-enforced merge gate.
